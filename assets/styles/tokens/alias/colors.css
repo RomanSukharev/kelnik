@@ -1,0 +1,8 @@
+:root {
+  --static-base: var(--base);
+  --static-white: var(--white);
+
+  --fg-default: var(--base);
+  --fg-secondary: var(--secondary-1);
+
+}

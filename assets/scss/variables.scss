@@ -1,0 +1,6 @@
+@use 'font_styles.scss' as *;
+
+$c_text: var(--fg-default); //основной цвет текста
+$c_text_second: var(--fg-secondary);
+
+$bg_filter: var(--bg-filter);

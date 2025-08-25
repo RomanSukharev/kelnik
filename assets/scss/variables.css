@@ -1,0 +1,16 @@
+:root {
+  color-scheme: only light;
+
+  --font_size_rule_26: 54px;
+  --font_size_rule_27: 14px;
+  --font_size_rule_28: 16px;
+
+  --line_height_rule_15: 101.852%;
+  --line_height_rule_16: 142.857%;
+  --line_height_rule_17: 150%;
+
+  --font_weight_rule_1: 400;
+  --font_weight_rule_2: 500;
+  --font_weight_rule_3: 600;
+  --font_weight_rule_4: 700;
+}

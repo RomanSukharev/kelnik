@@ -1,0 +1,62 @@
+@mixin setFontStyle1() {
+  font-family: "PtRoop bold";
+  font-style: normal;
+  font-variant-numeric: lining-nums proportional-nums;
+  font-weight: var(--font_weight_rule_4); /* 700 */ 
+  font-size: var(--font_size_rule_26); /* 54px */ 
+  line-height: var(--line_height_rule_15); /* 101.852% */ 
+}
+
+@mixin setFontStyle2() {
+  font-family: "PtRoop regular";
+  font-style: normal;
+  font-variant-numeric: lining-nums proportional-nums;
+  font-weight: var(--font_weight_rule_1); /* 400 */ 
+  font-size: var(--font_size_rule_27); /* 14px */
+  line-height: var(--line_height_rule_16); /* 142.857% */
+}
+
+@mixin setFontStyle3() {
+  font-family: "PtRoop regular";
+  font-variant-numeric: lining-nums proportional-nums;
+  font-style: normal;
+  font-weight: var(--font_weight_rule_1); /* 400 */ 
+  font-size: var(--font_size_rule_28); /* 16px */
+  line-height: var(--line_height_rule_17); /* 150% */
+}
+
+@mixin setFontStyle4() {
+  font-family: "PtRoop regular";
+  font-variant-numeric: lining-nums proportional-nums;
+  font-style: normal;
+  font-weight: var(--font_weight_rule_1); /* 400 */ 
+  font-size: var(--font_size_rule_27); /* 16px */
+  line-height: var(--line_height_rule_17); /* 150% */
+}
+
+@mixin setFontStyle5() {
+  font-family: "PtRoop medium";
+  font-variant-numeric: lining-nums proportional-nums;
+  font-style: normal;
+  font-weight: var(--font_weight_rule_1); /* 400 */ 
+  font-size: var(--font_size_rule_27); /* 16px */
+  line-height: var(--line_height_rule_17); /* 150% */
+}
+
+@mixin setFontStyle6() {
+  font-family: "PtRoop regular";
+  font-style: normal;
+  font-variant-numeric: lining-nums proportional-nums;
+  font-weight: var(--font_weight_rule_1); /* 400 */ 
+  font-size: var(--font_size_rule_27); /* 14px */
+  line-height: var(--line_height_rule_16); /* 142.857% */
+}
+
+@mixin setFontStyle7() {
+  font-family: "PtRoop medium";
+  font-style: normal;
+  font-variant-numeric: lining-nums proportional-nums;
+  font-weight: var(--font_weight_rule_1); /* 400 */ 
+  font-size: var(--font_size_rule_27); /* 16px */
+  line-height: var(--line_height_rule_17); /* 150% */
+}

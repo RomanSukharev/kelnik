@@ -1,0 +1,35 @@
+/* ---------------------------------- PtRoop (start) ---------------------------------- */
+
+@font-face {
+  font-family: "PtRoop light";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("../fonts/pt-root-ui_light.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "PtRoop regular";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("../fonts/pt-root-ui_regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "PtRoop medium";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("../fonts/pt-root-ui_medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "PtRoop bold";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("../fonts/pt-root-ui_bold.woff2") format("woff2");
+}
+
+/* ----------------------------------- PtRoop (end) ----------------------------------- */
