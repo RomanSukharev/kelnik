@@ -26,34 +26,19 @@ const props = defineProps<{
       <span class="apartment-card__name">{{ props.name }} №{{ props.number }}</span>
     </div>
 
-    <div class="apartment-card__square">
-      <span class="apartment-card__square-value">{{ props.square }} м²</span>
-    </div>
-
-    <div class="apartment-card__floor">
-      <span class="apartment-card__floor-current">{{ props.floor }}</span>
-
-      <span class="apartment-card__floor-max"> из {{ props.maxFloor }}</span>
-    </div>
-
-    <div class="apartment-card__cost">
-      {{ formatNumber(props.cost) }}
-    </div>
-
-    <!-- mobile -->
-    <div class="apartment-card__details-mobile">
-      <div class="apartment-card__square-mobile">
-        <span class="apartment-card__square-value">{{ props.square }} м²</span>
+    <div class="apartment-card__details">
+      <div class="apartment-card__square">
+        <span class="apartment-card__square-value">{{ props.square }}</span>
       </div>
 
-      <div class="apartment-card__floor-mobile">
+      <div class="apartment-card__floor">
         <span class="apartment-card__floor-current">{{ props.floor }}</span>
 
-        <span class="apartment-card__floor-max"> из {{ props.maxFloor }} этаж</span>
+        <span class="apartment-card__floor-max"> из {{ props.maxFloor }}</span>
       </div>
 
-      <div class="apartment-card__cost-mobile">
-        {{ formatNumber(props.cost) }} ₽
+      <div class="apartment-card__cost">
+        {{ formatNumber(props.cost) }}
       </div>
     </div>
   </div>
@@ -86,8 +71,11 @@ const props = defineProps<{
     color: $c_text;
   }
 
+  &__details {
+    display: contents;
+  }
+
   &__square {
-    color: #666;
 
     &-value {
       @include setFontStyle4;
@@ -96,7 +84,6 @@ const props = defineProps<{
   }
 
   &__floor {
-    color: #666;
 
     &-current {
       @include setFontStyle4;
@@ -113,36 +100,23 @@ const props = defineProps<{
     @include setFontStyle4;
     color: $c_text;
   }
-
-  &__details-mobile {
-    display: none;
-  }
 }
 
 @media screen and (max-width: 960px) {
   .apartment-card {
-    display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr 66px;
     grid-template-rows: auto auto;
     gap: 16px 20px;
     padding: 16px 24px;
     border: 1px solid #e5e5e5;
     border-radius: 8px;
-
-    &__square,
-    &__floor,
-    &__cost {
-      display: none;
-    }
+    align-items: start;
 
     &__image {
-      grid-row: 1 / -1;
+      grid-row: 1 / span 2;
       grid-column: 2;
-      width: 80px;
-      height: 100%;
-      margin: 0;
       object-fit: cover;
-      border-radius: 4px;
+      align-self: center;
     }
 
     &__type {
@@ -151,33 +125,35 @@ const props = defineProps<{
       align-self: start;
     }
 
-    &__details-mobile {
+    &__details {
       display: flex;
       align-items: center;
-      gap: 16px;
-      grid-row: 1;
+      gap: 20px;
+      grid-row: 2;
       grid-column: 1;
-      margin-top: 36px;
     }
 
-    &__square-mobile,
-    &__floor-mobile,
-    &__cost-mobile {
-      .apartment-card__square-value,
-      .apartment-card__floor-current,
-      .apartment-card__floor-max {
-        @include setFontStyle4;
-        color: $c_text;
-      }
-
-      .apartment-card__floor-max {
-        color: $c_text_second;
-      }
+    &__square,
+    &__floor,
+    &__cost {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 4px;
     }
 
-    &__cost-mobile {
+    &__square-value,
+    &__floor-current,
+    &__floor-max,
+    &__cost {
       @include setFontStyle4;
       color: $c_text;
+      white-space: nowrap;
+    }
+
+    &__floor-max {
+      color: $c_text_second;
+
     }
   }
 

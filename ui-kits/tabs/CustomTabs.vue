@@ -84,11 +84,8 @@ const toggleType = (type: string) => {
     }
 
     &--disabled {
-      opacity: 0.4;
       cursor: not-allowed;
-      box-shadow: none;
-      pointer-events: none;
-      color: #999;
+      color: #CED1D7;
     }
   }
 }

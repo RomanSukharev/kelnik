@@ -100,6 +100,22 @@ export const useApartmentsStore = defineStore("apartments", () => {
   });
 
   const typeOptions = computed<string[]>(() => {
+    return [...new Set(flatList.value.map((i) => i.type))].sort((a, b) => {
+      const aType = isNaN(parseInt(a[0])) ? "letter" : "number";
+      const bType = isNaN(parseInt(b[0])) ? "letter" : "number";
+
+      if (aType !== bType) {
+        return aType === "letter" ? -1 : 1;
+      }
+
+      if (aType === "number") {
+        return parseInt(a) - parseInt(b);
+      }
+      return a.localeCompare(b);
+    });
+  });
+
+  const availableTypesByOtherFilters = computed<Set<string>>(() => {
     let result = flatList.value;
 
     if (router.currentRoute.value.query.squareMin) {
@@ -118,20 +134,7 @@ export const useApartmentsStore = defineStore("apartments", () => {
       result = result.filter((i) => i.cost <= +(router.currentRoute.value.query.costMax as string));
     }
 
-
-    return [...new Set(result.map((i) => i.type))].sort((a, b) => {
-      const aType = isNaN(parseInt(a[0])) ? "letter" : "number";
-      const bType = isNaN(parseInt(b[0])) ? "letter" : "number";
-
-      if (aType !== bType) {
-        return aType === "letter" ? -1 : 1;
-      }
-
-      if (aType === "number") {
-        return parseInt(a) - parseInt(b);
-      }
-      return a.localeCompare(b);
-    });
+    return new Set(result.map((i) => i.type));
   });
 
   const typeCurrent = computed<string[]>({
@@ -140,16 +143,6 @@ export const useApartmentsStore = defineStore("apartments", () => {
       router.replace({ query: { ...router.currentRoute.value.query, types: val } });
     },
   });
-
-  // ------------ TYPE END -------------------------------
-
-  const closest = (a: TAny[], g: number) => {
-    if (!a.length) return g;
-
-    return a.reduce((p, c) =>
-      (Math.abs(c - g) < Math.abs(p - g) ? c : p)
-    );
-  };
 
   // ------------ COST --------------------------------------
 
@@ -186,11 +179,7 @@ export const useApartmentsStore = defineStore("apartments", () => {
       return "0";
     },
     set: (val: string) => {
-
-      const input = document.getElementById("input_costMin") as HTMLInputElement | TAny;
-
       const valConverted = +val.replace(/\s+/g, "");
-
       const costMaxConverted = +costMax.value.replace(/\s+/g, "");
 
       const arrayForMinCost = [
@@ -201,41 +190,18 @@ export const useApartmentsStore = defineStore("apartments", () => {
         ),
       ].sort((a, b) => a - b);
 
-      const closestInArr = closest(arrayForMinCost, valConverted);
+      if (!arrayForMinCost.length) return;
 
-      if (valConverted >= Math.min(...arrayForMinCost) && valConverted <= costMaxConverted) {
-        if (valConverted === Math.min(...arrayForMinCost)) {
-          router.replace({
-            query: { ...router.currentRoute.value.query, costMin: undefined },
-          });
-          return;
-        }
+      const lowerOrEqual = [...arrayForMinCost].reverse().find(c => c <= valConverted);
+      const fallback = Math.min(...arrayForMinCost);
+      const newValue = lowerOrEqual ?? fallback;
 
-        if (!arrayForMinCost.filter((item) => item >= valConverted).length) {
-          router.replace({
-            query: {
-              ...router.currentRoute.value.query,
-              costMin: closestInArr === Math.min(...arrayForMinCost) ? undefined : closestInArr,
-
-            },
-          });
-          input.value = closestInArr.toLocaleString("ru-RU");
-          return;
-        }
-        router.replace({
-          query: { ...router.currentRoute.value.query, costMin: valConverted },
-        });
-      } else {
-        if (closestInArr === Math.min(...arrayForMinCost)) {
-          router.replace({ query: { ...router.currentRoute.value.query, costMin: undefined } });
-          input.value = closestInArr.toLocaleString("ru-RU");
-          return;
-        }
-        router.replace({
-          query: { ...router.currentRoute.value.query, costMin: closestInArr },
-        });
-        input.value = closestInArr.toLocaleString("ru-RU");
-      }
+      router.replace({
+        query: {
+          ...router.currentRoute.value.query,
+          costMin: newValue === fallback ? undefined : newValue,
+        },
+      });
     },
   });
 
@@ -253,14 +219,10 @@ export const useApartmentsStore = defineStore("apartments", () => {
       return "0";
     },
     set: (val: string) => {
-
-      const input = document.getElementById("input_costMax") as HTMLInputElement | TAny;
-
       const valConverted = +val.replace(/\s+/g, "");
-
       const costMinConverted = +costMin.value.replace(/\s+/g, "");
 
-      const array_for_max_cost = [
+      const arrayForMaxCost = [
         ...new Set(
           resultForCost.value
             .filter((item) => item.cost >= costMinConverted)
@@ -268,48 +230,24 @@ export const useApartmentsStore = defineStore("apartments", () => {
         ),
       ].sort((a, b) => a - b);
 
-      const closestInArr = closest(array_for_max_cost, valConverted);
+      if (!arrayForMaxCost.length) return;
 
-      if (valConverted <= Math.max(...array_for_max_cost) && valConverted >= costMinConverted) {
-        if (valConverted === Math.max(...array_for_max_cost)) {
-          router.replace({
-            query: { ...router.currentRoute.value.query, costMax: undefined },
-          });
-          return;
-        }
+      const higherOrEqual = arrayForMaxCost.find(c => c >= valConverted);
+      const fallback = Math.max(...arrayForMaxCost);
+      const newValue = higherOrEqual ?? fallback;
 
-        if (!array_for_max_cost.filter((item) => item <= valConverted).length) {
-          router.replace({
-            query: {
-              ...router.currentRoute.value.query,
-              costMax: closestInArr === Math.max(...array_for_max_cost) ? undefined : closestInArr,
-            },
-          });
-          input.value = closestInArr.toLocaleString("ru-RU");
-          return;
-        }
-
-        router.replace({
-          query: { ...router.currentRoute.value.query, costMax: valConverted },
-        });
-      } else {
-        if (closestInArr === Math.max(...array_for_max_cost)) {
-          router.replace({ query: { ...router.currentRoute.value.query, costMax: undefined } });
-          input.value = closestInArr.toLocaleString("ru-RU");
-          return;
-        }
-
-        router.replace({
-          query: { ...router.currentRoute.value.query, costMax: closestInArr },
-        });
-        input.value = closestInArr.toLocaleString("ru-RU");
-      }
+      router.replace({
+        query: {
+          ...router.currentRoute.value.query,
+          costMax: newValue === fallback ? undefined : newValue,
+        },
+      });
     },
   });
 
   // ------------ COST end--------------------------------------
 
-  // ------------ Square -------------------------------------
+  // ------------ SQUARE -------------------------------------
 
   const resultForSquare = computed<IApartmentProps[]>(() => {
     let result: IApartmentProps[] = flatList.value;
@@ -343,8 +281,6 @@ export const useApartmentsStore = defineStore("apartments", () => {
     },
     set: (val: number) => {
 
-      const input = document.getElementById("input_squareMin") as HTMLInputElement | TAny;
-
       const arrayForMinSquare = [
         ...new Set(
           resultForSquare.value
@@ -352,6 +288,8 @@ export const useApartmentsStore = defineStore("apartments", () => {
             .map((item) => item.square)
         ),
       ].sort((a, b) => a - b);
+
+      if (!arrayForMinSquare.length) return;
 
       const closestInArr = closest(arrayForMinSquare, val);
 
@@ -363,37 +301,14 @@ export const useApartmentsStore = defineStore("apartments", () => {
           return;
         }
 
-        if (!arrayForMinSquare.filter((item) => item >= val).length) {
-          router.replace({
-            query: {
-              ...router.currentRoute.value.query,
-              squareMin:
-                Math.floor(closestInArr) === Math.floor(Math.min(...arrayForMinSquare))
-                  ? undefined
-                  : Math.floor(closestInArr),
-
-            },
-          });
-
-          input.value = Math.floor(closestInArr);
-          return;
-        }
-
         router.replace({ query: { ...router.currentRoute.value.query, squareMin: val } });
       } else {
-        if (Math.floor(closestInArr) === Math.floor(Math.min(...arrayForMinSquare))) {
-          router.replace({ query: { ...router.currentRoute.value.query, squareMin: undefined } });
-          input.value = Math.floor(closestInArr);
-          return;
-        }
         router.replace({
           query: {
             ...router.currentRoute.value.query,
             squareMin: Math.floor(closestInArr),
-
           },
         });
-        input.value = Math.floor(closestInArr);
       }
     },
   });
@@ -410,8 +325,6 @@ export const useApartmentsStore = defineStore("apartments", () => {
     },
     set: (val: number) => {
 
-      const input = document.getElementById("input_squareMax") as HTMLInputElement | TAny;
-
       const arrayForMaxSquare = [
         ...new Set(
           resultForSquare.value
@@ -419,6 +332,8 @@ export const useApartmentsStore = defineStore("apartments", () => {
             .map((item) => item.square)
         ),
       ].sort((a, b) => a - b);
+
+      if (!arrayForMaxSquare.length) return;
 
       const closestInArr = closest(arrayForMaxSquare, val);
 
@@ -430,38 +345,55 @@ export const useApartmentsStore = defineStore("apartments", () => {
           return;
         }
 
-        if (!arrayForMaxSquare.filter((item) => item <= val).length) {
-          router.replace({
-            query: {
-              ...router.currentRoute.value.query,
-              squareMax:
-                Math.ceil(closestInArr) === Math.ceil(Math.max(...arrayForMaxSquare))
-                  ? undefined
-                  : Math.ceil(closestInArr),
-
-            },
-          });
-          input.value = Math.ceil(closestInArr);
-          return;
-        }
-
         router.replace({ query: { ...router.currentRoute.value.query, squareMax: val } });
       } else {
-        if (Math.ceil(closestInArr) === Math.ceil(Math.max(...arrayForMaxSquare))) {
-          router.replace({ query: { ...router.currentRoute.value.query, squareMax: undefined } });
-          input.value = Math.ceil(closestInArr);
-          return;
-        }
         router.replace({
           query: { ...router.currentRoute.value.query, squareMax: Math.ceil(closestInArr) },
         });
-        input.value = Math.ceil(closestInArr);
       }
     },
   });
 
-  // ------------ square END -------------------------------
-  
+  // ------------ SQUARE END -------------------------------
+  watch(
+    () => [costMin.value, costMax.value],
+    ([min, max]) => {
+      const minNum = min ? Number(min.replace(/\s/g, "")) : undefined;
+      const maxNum = max ? Number(max.replace(/\s/g, "")) : undefined;
+
+      if (minNum && maxNum && minNum > maxNum) {
+        const correctedMin = Math.min(minNum, maxNum);
+        const correctedMax = Math.max(minNum, maxNum);
+
+        router.replace({
+          query: {
+            ...router.currentRoute.value.query,
+            costMin: correctedMin,
+            costMax: correctedMax,
+          },
+        });
+      }
+    }
+  );
+
+  watch(
+    () => [squareMin.value, squareMax.value],
+    ([min, max]) => {
+      if (min && max && min > max) {
+        const correctedMin = Math.min(min, max);
+        const correctedMax = Math.max(min, max);
+
+        router.replace({
+          query: {
+            ...router.currentRoute.value.query,
+            squareMin: correctedMin,
+            squareMax: correctedMax,
+          },
+        });
+      }
+    }
+  );
+
   const costAvailableMin = computed(() => {
     if (!resultForCost.value.length) return 0;
     return Math.min(...resultForCost.value.map(i => i.cost));
@@ -481,6 +413,13 @@ export const useApartmentsStore = defineStore("apartments", () => {
     if (!resultForSquare.value.length) return 0;
     return Math.ceil(Math.max(...resultForSquare.value.map(i => i.square)));
   });
+
+  const closest = (a: TAny[], g: number) => {
+    if (!a.length) return g;
+    return a.reduce((p, c) =>
+      (Math.abs(c - g) < Math.abs(p - g) ? c : p)
+    );
+  };
 
   const resetAllFilters = () => {
     sortField.value = null;
@@ -509,6 +448,7 @@ export const useApartmentsStore = defineStore("apartments", () => {
     setSort,
     resetAllFilters,
     filteredTypes,
+    availableTypesByOtherFilters,
 
     costAvailableMin,
     costAvailableMax,

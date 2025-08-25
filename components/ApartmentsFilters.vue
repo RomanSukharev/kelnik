@@ -8,7 +8,7 @@ const tabs = computed(() => {
   return store.typeOptions.map(type => ({
     title: type,
     value: type,
-    disabled: !store.flatList.some(flat => flat.type === type),
+    disabled: !store.availableTypesByOtherFilters.has(type),
   }));
 });
 

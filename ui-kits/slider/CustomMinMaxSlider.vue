@@ -25,15 +25,24 @@ const slider = ref<HTMLElement | null>(null);
 const sliderMinValue = ref(props.minValue);
 const sliderMaxValue = ref(props.maxValue);
 
+
 watch(() => props.minValue, (newVal) => {
-  if (newVal !== sliderMinValue.value) {
+  const parsedNewVal = safeParseFloat(newVal);
+  const currentParsed = safeParseFloat(sliderMinValue.value);
+  
+  if (parsedNewVal !== currentParsed) {
     sliderMinValue.value = newVal;
+    previousMinValue.value = parsedNewVal;
   }
 });
 
 watch(() => props.maxValue, (newVal) => {
-  if (newVal !== sliderMaxValue.value) {
+  const parsedNewVal = safeParseFloat(newVal);
+  const currentParsed = safeParseFloat(sliderMaxValue.value);
+  
+  if (parsedNewVal !== currentParsed) {
     sliderMaxValue.value = newVal;
+    previousMaxValue.value = parsedNewVal;
   }
 });
 
@@ -45,6 +54,9 @@ const safeParseFloat = (value: string | number): number => {
   const parsed = parseFloat(cleaned);
   return isNaN(parsed) ? 0 : parsed;
 };
+
+const previousMinValue = ref(safeParseFloat(props.minValue));
+const previousMaxValue = ref(safeParseFloat(props.maxValue));
 
 const safeFormatValue = (value: number | string): string => {
   const numValue = safeParseFloat(value);
@@ -83,11 +95,23 @@ const onLocalInput = (event: Event): void => {
   const value = parseFloat(target.value);
   if (isNaN(value)) return;
 
+  const currentMin = safeParseFloat(sliderMinValue.value);
+  const currentMax = safeParseFloat(sliderMaxValue.value);
+
   if (target.name === 'min') {
-    sliderMinValue.value = props.formatCurrency ? safeFormatValue(value) : value;
-  }
-  if (target.name === 'max') {
-    sliderMaxValue.value = props.formatCurrency ? safeFormatValue(value) : value;
+    if (value > currentMax) {
+      target.value = previousMinValue.value.toString();
+    } else {
+      sliderMinValue.value = props.formatCurrency ? safeFormatValue(value) : value;
+      previousMinValue.value = value;
+    }
+  } else if (target.name === 'max') {
+    if (value < currentMin) {
+      target.value = previousMaxValue.value.toString();
+    } else {
+      sliderMaxValue.value = props.formatCurrency ? safeFormatValue(value) : value;
+      previousMaxValue.value = value;
+    }
   }
 };
 
@@ -96,11 +120,25 @@ const onCommit = (event: Event): void => {
   const value = parseFloat(target.value);
   if (isNaN(value)) return;
 
+  const currentMin = safeParseFloat(sliderMinValue.value);
+  const currentMax = safeParseFloat(sliderMaxValue.value);
+
   if (target.name === 'min') {
-    emit("update:minValue", props.formatCurrency ? safeFormatValue(value) : value);
-  }
-  if (target.name === 'max') {
-    emit("update:maxValue", props.formatCurrency ? safeFormatValue(value) : value);
+    if (value > currentMax) {
+      emit("update:minValue", props.formatCurrency ? safeFormatValue(previousMinValue.value) : previousMinValue.value);
+    } else {
+      const finalValue = Math.min(value, currentMax);
+      emit("update:minValue", props.formatCurrency ? safeFormatValue(finalValue) : finalValue);
+      previousMinValue.value = finalValue;
+    }
+  } else if (target.name === 'max') {
+    if (value < currentMin) {
+      emit("update:maxValue", props.formatCurrency ? safeFormatValue(previousMaxValue.value) : previousMaxValue.value);
+    } else {
+      const finalValue = Math.max(value, currentMin);
+      emit("update:maxValue", props.formatCurrency ? safeFormatValue(finalValue) : finalValue);
+      previousMaxValue.value = finalValue;
+    }
   }
 };
 </script>
@@ -117,7 +155,7 @@ const onCommit = (event: Event): void => {
 
         <span class="value-to">
           <span class="value-prefix">до</span>
- 
+
           <span class="value-number">{{ sliderMaxValue }}</span>
         </span>
       </div>
@@ -153,7 +191,6 @@ const onCommit = (event: Event): void => {
   </div>
 </template>
 
-
 <style lang="scss">
 .slider-container {
   width: 100%;
@@ -173,7 +210,6 @@ const onCommit = (event: Event): void => {
   min-width: 72px;
   justify-content: flex-start;
 }
-
 
 .slider-header {
   display: flex;
@@ -295,7 +331,6 @@ const onCommit = (event: Event): void => {
       border-radius: 999px;
     }
   }
-
 
   input[type="range"] {
     position: absolute;
